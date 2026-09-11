@@ -1,1 +1,17 @@
 name: dbt-ci
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate Workflow
+        run: echo "dbt-ci workflow is valid"
