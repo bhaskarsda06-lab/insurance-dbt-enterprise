@@ -1,0 +1,1 @@
+select customer_id,count(*) total_policies from {{ ref("int_policy_payment") }} group by customer_id

@@ -1,0 +1,4 @@
+name: insurance_dbt
+version: 1.0
+config-version: 2
+profile: insurance_dbt

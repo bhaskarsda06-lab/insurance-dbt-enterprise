@@ -1,0 +1,1 @@
+{% snapshot customer_snapshot %} select * from {{ source("bronze","customer") }} {% endsnapshot %}

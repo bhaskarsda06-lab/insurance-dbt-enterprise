@@ -1,0 +1,1 @@
+Daily: dbt source freshness, dbt build, dbt snapshot.

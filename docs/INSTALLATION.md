@@ -1,0 +1,1 @@
+Install dbt-databricks, configure profiles, run dbt debug, dbt build.

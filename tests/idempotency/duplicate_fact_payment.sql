@@ -1,0 +1,1 @@
+select payment_id,count(*) from {{ ref("fact_payment") }} group by 1 having count(*)>1
