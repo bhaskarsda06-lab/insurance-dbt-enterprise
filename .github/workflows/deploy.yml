@@ -27,11 +27,3 @@ jobs:
       - name: Verify Authentication
         run: |
           databricks auth describe --profile DEFAULT
-
-      - name: Validate Bundle
-        run: |
-          databricks bundle validate --profile DEFAULT
-
-      - name: Deploy Bundle
-        run: |
-          databricks bundle deploy --profile DEFAULT
