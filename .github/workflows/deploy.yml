@@ -1,0 +1,57 @@
+name: Deploy Databricks Bundle
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Create Databricks Profile
+        run: |
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+
+      - name: Verify Authentication
+        run: |
+          databricks auth describe --profile DEFAULT
+
+      - name: Validate Bundle
+        run: |
+          databricks bundle validate --profile DEFAULT
+
+      - name: Deploy Bundle
+        run: |
+          databricks bundle deploy --profile DEFAULT
+      - name: Setup Databricks CLI
+          uses: databricks/setup-cli@main
+      - name: Create Databricks Profile
+        run: |
+          cat > ~/.databrickscfg << EOF
+          [DEFAULT]
+          host = ${{ secrets.DATABRICKS_HOST }}
+          token = ${{ secrets.DATABRICKS_TOKEN }}
+          EOF
+      - name: Verify Databricks Authentication
+        run: |
+          databricks auth describe --profile DEFAULT
+      - name: Validate Bundle
+        run: |
+          databricks bundle validate --profile DEFAULT
+      - name: Deploy Bundle
+        run: |
+          databricks bundle deploy --profile DEFAULT     
+          
+             
