@@ -1,2 +1,4 @@
-payment_id,policy_id,payment_amount
-PMT1,P1001,500
+payment_id,payment_amount,payment_date,customer_id
+P001,100.50,2026-09-01,C001
+P002,250.00,2026-09-02,C002
+P003,75.25,2026-09-03,C001

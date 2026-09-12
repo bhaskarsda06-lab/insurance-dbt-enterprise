@@ -2,11 +2,15 @@ name: Deploy Databricks dbt Project
 
 on:
   push:
-    branches: [develop, uat, main]
+    branches:
+      - develop
+      - uat
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'dev' || 'uat' }}
 
@@ -19,10 +23,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dbt
+      - name: Install dbt Databricks
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install dbt-databricks
           dbt --version
 
       - name: Setup Databricks CLI
@@ -38,11 +42,14 @@ jobs:
           chmod 600 ~/.databrickscfg
 
       - name: Create dbt Profile
+        shell: bash
         run: |
           mkdir -p ~/.dbt
+
           cat > ~/.dbt/profiles.yml << EOF
           insurance_dbt:
             target: ${{ vars.DBT_TARGET }}
+
             outputs:
               dev:
                 type: databricks
@@ -53,6 +60,7 @@ jobs:
                 catalog: ${{ vars.DBT_CATALOG }}
                 schema: ${{ vars.DBT_SCHEMA }}
                 threads: 4
+
               uat:
                 type: databricks
                 method: http
@@ -62,6 +70,7 @@ jobs:
                 catalog: ${{ vars.DBT_CATALOG }}
                 schema: ${{ vars.DBT_SCHEMA }}
                 threads: 4
+
               prod:
                 type: databricks
                 method: http
@@ -72,26 +81,53 @@ jobs:
                 schema: ${{ vars.DBT_SCHEMA }}
                 threads: 4
           EOF
+
           chmod 600 ~/.dbt/profiles.yml
+          echo "dbt profile created successfully."
 
-      - name: Install Dependencies
-        run: dbt deps --profiles-dir ~/.dbt
+      - name: Verify dbt Profile
+        run: |
+          ls -la ~/.dbt
+          test -f ~/.dbt/profiles.yml
+          echo "profiles.yml exists."
 
-      - name: Parse
-        run: dbt parse --profiles-dir ~/.dbt
+      - name: Install dbt Dependencies
+        run: |
+          dbt deps --profiles-dir ~/.dbt
+
+      - name: Debug dbt Configuration
+        run: |
+          echo "===== dbt_project.yml ====="
+          cat dbt_project.yml
+          echo ""
+          echo "===== dbt Profile Check ====="
+          ls -la ~/.dbt
+          echo "Secrets are intentionally not displayed."
+
+      - name: Parse Project
+        run: |
+          dbt parse --profiles-dir ~/.dbt
 
       - name: Validate Connection
-        run: dbt debug --profiles-dir ~/.dbt
+        run: |
+          dbt debug --profiles-dir ~/.dbt
 
-      - name: Build Models and Tests
-        run: dbt build --profiles-dir ~/.dbt
+      - name: Run Models
+        run: |
+          dbt run --profiles-dir ~/.dbt
 
-      - name: Source Freshness
+      - name: Run Tests
+        run: |
+          dbt test --profiles-dir ~/.dbt
+
+      - name: Check Source Freshness
         continue-on-error: true
-        run: dbt source freshness --profiles-dir ~/.dbt
+        run: |
+          dbt source freshness --profiles-dir ~/.dbt
 
       - name: Generate Docs
-        run: dbt docs generate --profiles-dir ~/.dbt
+        run: |
+          dbt docs generate --profiles-dir ~/.dbt
 
       - name: Upload dbt Artifacts
         if: always()

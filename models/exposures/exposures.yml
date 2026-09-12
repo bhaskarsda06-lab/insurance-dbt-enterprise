@@ -1,14 +1,2 @@
 version: 2
-
-exposures:
-  - name: insurance_customer_dashboard
-    label: Insurance Customer Dashboard
-    type: dashboard
-    maturity: medium
-    url: https://example.com/powerbi/insurance
-    description: "Example downstream dashboard exposure."
-    depends_on:
-      - ref('customer_policy_summary')
-    owner:
-      name: Data Engineering
-      email: data-engineering@example.com
+exposures: []

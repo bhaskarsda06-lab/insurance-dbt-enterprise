@@ -1,12 +1,2 @@
 insurance_dbt:
   target: dev
-  outputs:
-    dev:
-      type: databricks
-      method: http
-      host: <DATABRICKS_HOST>
-      http_path: <DATABRICKS_HTTP_PATH>
-      token: <DATABRICKS_TOKEN>
-      catalog: hive_metastore
-      schema: default
-      threads: 4

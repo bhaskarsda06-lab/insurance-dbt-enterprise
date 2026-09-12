@@ -1,2 +1,4 @@
-customer_id,first_name
-C001,Bhaskar
+customer_id,customer_name,email,updated_at
+C001,John Doe,john@example.com,2026-09-01 10:00:00
+C002,Jane Smith,jane@example.com,2026-09-02 11:00:00
+C003,Bob Wilson,bob@example.com,2026-09-03 12:00:00

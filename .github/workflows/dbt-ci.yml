@@ -2,49 +2,53 @@ name: dbt CI
 
 on:
   pull_request:
-  push:
-    branches: [main, develop, uat]
+    branches: [develop, uat, main]
 
 jobs:
   dbt-ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install dbt
-        run: pip install -r requirements.txt
-      - name: Create profile
+
+      - name: Install dbt Databricks
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          dbt --version
+
+      - name: Create dbt Profile
         run: |
           mkdir -p ~/.dbt
           cat > ~/.dbt/profiles.yml << EOF
           insurance_dbt:
-            target: dev
+            target: ci
             outputs:
-              dev:
+              ci:
                 type: databricks
                 method: http
                 host: ${{ secrets.DATABRICKS_HOST }}
                 http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
                 token: ${{ secrets.DATABRICKS_TOKEN }}
-                catalog: hive_metastore
-                schema: default
+                catalog: ${{ vars.DBT_CATALOG }}
+                schema: ${{ vars.DBT_SCHEMA }}
                 threads: 4
           EOF
           chmod 600 ~/.dbt/profiles.yml
-      - name: Dependencies
+
+      - name: dbt Dependencies
         run: dbt deps --profiles-dir ~/.dbt
-      - name: Parse
-        run: dbt parse --profiles-dir ~/.dbt
-      - name: Build
+
+      - name: dbt Parse
+        run: dbt parse --profiles-dir ~/.dbt --no-partial-parse
+
+      - name: dbt Debug
+        run: dbt debug --profiles-dir ~/.dbt
+
+      - name: dbt Build
         run: dbt build --profiles-dir ~/.dbt
-      - name: Docs
-        if: always()
-        run: dbt docs generate --profiles-dir ~/.dbt
-      - name: Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dbt-artifacts
-          path: target/

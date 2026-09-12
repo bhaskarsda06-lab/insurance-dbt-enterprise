@@ -13,8 +13,6 @@ select
     customer_id,
     customer_name,
     email,
-    city,
-    state,
     updated_at
 from {{ source('bronze', 'customer') }}
 

@@ -1,2 +1,24 @@
 version: 2
-models: []
+
+models:
+  - name: fact_payment
+    description: "Payment fact table demonstrating incremental merge and model contracts."
+    config:
+      contract:
+        enforced: true
+    columns:
+      - name: payment_id
+        data_type: string
+        description: "Unique payment identifier."
+        data_tests:
+          - not_null
+          - unique
+      - name: payment_amount
+        data_type: double
+        description: "Payment amount."
+      - name: payment_date
+        data_type: date
+        description: "Payment date."
+      - name: customer_id
+        data_type: string
+        description: "Customer identifier."

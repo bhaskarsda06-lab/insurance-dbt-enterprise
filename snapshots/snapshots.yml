@@ -1,0 +1,12 @@
+version: 2
+
+snapshots:
+  - name: customer_snapshot
+    description: "Customer history maintained using dbt timestamp snapshots."
+    columns:
+      - name: customer_id
+        description: "Customer business key."
+      - name: dbt_valid_from
+        description: "Timestamp when this version became valid."
+      - name: dbt_valid_to
+        description: "Timestamp when this version stopped being valid."
