@@ -39,6 +39,7 @@ jobs:
           host = ${{ secrets.DATABRICKS_HOST }}
           token = ${{ secrets.DATABRICKS_TOKEN }}
           EOF
+
           chmod 600 ~/.databrickscfg
 
       - name: Create dbt Profile
@@ -46,7 +47,7 @@ jobs:
           mkdir -p ~/.dbt
 
           cat > ~/.dbt/profiles.yml << EOF
-          insurance_dbt_enterprise:
+          insurance_dbt:
             target: dev
             outputs:
               dev:
@@ -60,13 +61,12 @@ jobs:
                 threads: 4
           EOF
 
-          echo "Created profile successfully"
+          echo "Profile created successfully"
           ls -la ~/.dbt
           cat ~/.dbt/profiles.yml
 
-      - name: Verify dbt Directory
+      - name: Verify dbt Profile
         run: |
-          echo "HOME=$HOME"
           ls -la ~/.dbt
           test -f ~/.dbt/profiles.yml
 
@@ -74,12 +74,13 @@ jobs:
         run: |
           dbt deps --profiles-dir ~/.dbt
 
-      - name: Debug Profile Directory
+      - name: Debug dbt Configuration
         run: |
-          whoami
-          echo $HOME
-          pwd
-          ls -la ~/.dbt
+          echo "===== dbt_project.yml ====="
+          cat dbt_project.yml
+
+          echo ""
+          echo "===== profiles.yml ====="
           cat ~/.dbt/profiles.yml
 
       - name: Parse Project
@@ -98,6 +99,20 @@ jobs:
         run: |
           dbt test --profiles-dir ~/.dbt
 
+      - name: Check Source Freshness
+        continue-on-error: true
+        run: |
+          dbt source freshness --profiles-dir ~/.dbt
+
       - name: Generate Docs
         run: |
           dbt docs generate --profiles-dir ~/.dbt
+
+      - name: Upload dbt Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-artifacts-${{ github.ref_name }}-${{ github.run_number }}
+          path: target/
+          if-no-files-found: warn
+          retention-days: 30
