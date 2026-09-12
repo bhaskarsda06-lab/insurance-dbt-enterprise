@@ -73,7 +73,6 @@ jobs:
                 schema: default
                 threads: 4
           EOF
-
           chmod 600 "$HOME/.dbt/profiles.yml"
           ls -la "$HOME/.dbt"
           test -f "$HOME/.dbt/profiles.yml"
