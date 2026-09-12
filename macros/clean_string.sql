@@ -1,1 +1,3 @@
-{% macro clean_string(column_name) %} upper(trim({{ column_name }})) {% endmacro %}
+{% macro clean_string(column_name) -%}
+    nullif(trim(regexp_replace(cast({{ column_name }} as string), '\\s+', ' ')), '')
+{%- endmacro %}

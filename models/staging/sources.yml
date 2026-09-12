@@ -1,7 +1,32 @@
 version: 2
+
 sources:
-- name: bronze
-  tables:
-  - name: customer
-  - name: policy
-  - name: payment
+  - name: bronze
+    description: "Bronze/source tables used by the demo project."
+    schema: default
+    tables:
+      - name: customer
+        description: "Customer master data."
+        loaded_at_field: updated_at
+        freshness:
+          warn_after: {count: 24, period: hour}
+          error_after: {count: 48, period: hour}
+        columns:
+          - name: customer_id
+            tests:
+              - not_null
+              - unique
+      - name: policy
+        description: "Policy data."
+        columns:
+          - name: policy_id
+            tests:
+              - not_null
+              - unique
+      - name: payment
+        description: "Payment transactions."
+        columns:
+          - name: payment_id
+            tests:
+              - not_null
+              - unique

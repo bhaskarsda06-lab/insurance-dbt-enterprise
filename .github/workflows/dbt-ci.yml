@@ -1,17 +1,50 @@
-name: dbt-ci
+name: dbt CI
 
 on:
+  pull_request:
   push:
-    branches:
-      - main
+    branches: [main, develop, uat]
 
 jobs:
-  validate:
+  dbt-ci:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Validate Workflow
-        run: echo "dbt-ci workflow is valid"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dbt
+        run: pip install -r requirements.txt
+      - name: Create profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << EOF
+          insurance_dbt:
+            target: dev
+            outputs:
+              dev:
+                type: databricks
+                method: http
+                host: ${{ secrets.DATABRICKS_HOST }}
+                http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
+                token: ${{ secrets.DATABRICKS_TOKEN }}
+                catalog: hive_metastore
+                schema: default
+                threads: 4
+          EOF
+          chmod 600 ~/.dbt/profiles.yml
+      - name: Dependencies
+        run: dbt deps --profiles-dir ~/.dbt
+      - name: Parse
+        run: dbt parse --profiles-dir ~/.dbt
+      - name: Build
+        run: dbt build --profiles-dir ~/.dbt
+      - name: Docs
+        if: always()
+        run: dbt docs generate --profiles-dir ~/.dbt
+      - name: Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-artifacts
+          path: target/
