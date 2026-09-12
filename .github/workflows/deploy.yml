@@ -70,9 +70,16 @@ jobs:
 
           chmod 600 "$HOME/.dbt/profiles.yml"
 
-          echo "Verifying dbt profile..."
+          echo "Verifying profile creation..."
+          echo "HOME=$HOME"
           ls -la "$HOME/.dbt"
-          cat "$HOME/.dbt/profiles.yml"
+          test -f "$HOME/.dbt/profiles.yml"
+
+      - name: Verify dbt Profile Directory
+        run: |
+          echo "Checking profile directory..."
+          ls -la "$HOME/.dbt"
+          test -f "$HOME/.dbt/profiles.yml"
 
       - name: Install dbt Dependencies
         run: |
