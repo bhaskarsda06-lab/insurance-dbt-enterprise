@@ -43,28 +43,28 @@ jobs:
           chmod 600 ~/.databrickscfg
 
       - name: Create dbt Profile
-        run: |
-          mkdir -p ~/.dbt
+  shell: bash
+  run: |
+    mkdir -p ~/.dbt
 
-          cat > ~/.dbt/profiles.yml << EOF
-          insurance_dbt:
-            target: dev
-            outputs:
-              dev:
-                type: databricks
-                method: http
-                host: ${{ secrets.DATABRICKS_HOST }}
-                http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
-                token: ${{ secrets.DATABRICKS_TOKEN }}
-                catalog: hive_metastore
-                schema: default
-                threads: 4
-          EOF
+    cat > ~/.dbt/profiles.yml << EOF
+    insurance_dbt:
+      target: dev
+      outputs:
+        dev:
+          type: databricks
+          method: http
+          host: ${{ secrets.DATABRICKS_HOST }}
+          http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
+          token: ${{ secrets.DATABRICKS_TOKEN }}
+          catalog: hive_metastore
+          schema: default
+          threads: 4
+    EOF
 
-          echo "Profile created successfully"
-          ls -la ~/.dbt
-          cat ~/.dbt/profiles.yml
-
+    echo "===== CREATED PROFILE ====="
+    cat ~/.dbt/profiles.yml
+          
       - name: Verify dbt Profile
         run: |
           ls -la ~/.dbt
