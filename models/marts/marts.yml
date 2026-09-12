@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: "Customer dimension."
+    columns:
+      - name: customer_id
+        description: "Business key."
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_name
+        data_tests:
+          - not_null
+
+  - name: dim_policy
+    description: "Policy dimension."
+    columns:
+      - name: policy_id
+        data_tests:
+          - not_null
+          - unique
+      - name: customer_id
+        data_tests:
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+
+  
+  - name: customer_policy_summary
+    description: "Customer-level policy and payment aggregate."
+    columns:
+      - name: customer_id
+        data_tests:
+          - not_null
+          - unique
