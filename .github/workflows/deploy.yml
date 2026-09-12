@@ -23,6 +23,13 @@ jobs:
           echo "Branch: ${{ github.ref_name }}"
           echo "Environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'dev' || 'uat' }}"
 
+      - name: Verify Project Structure
+        run: |
+          pwd
+          ls -la
+          find . -name "dbt_project.yml"
+          find . -name "packages.yml" || true
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -45,7 +52,6 @@ jobs:
           host = ${{ secrets.DATABRICKS_HOST }}
           token = ${{ secrets.DATABRICKS_TOKEN }}
           EOF
-
           chmod 600 ~/.databrickscfg
 
       - name: Create dbt Profile
@@ -69,47 +75,30 @@ jobs:
           EOF
 
           chmod 600 "$HOME/.dbt/profiles.yml"
-
-          echo "Verifying profile creation..."
-          pwd
-          echo "HOME=$HOME"
-          ls -la "$HOME/.dbt"
-          cat "$HOME/.dbt/profiles.yml"
-
-      - name: Verify dbt Profile Directory
-        run: |
-          echo "Checking profile directory..."
           ls -la "$HOME/.dbt"
           test -f "$HOME/.dbt/profiles.yml"
 
       - name: Install dbt Dependencies
-        run: |
-          dbt deps --profiles-dir "$HOME/.dbt"
+        run: dbt deps --profiles-dir "$HOME/.dbt"
 
       - name: Parse Project
-        run: |
-          dbt parse --profiles-dir "$HOME/.dbt"
+        run: dbt parse --profiles-dir "$HOME/.dbt"
 
       - name: Validate Connection
-        run: |
-          dbt debug --profiles-dir "$HOME/.dbt"
+        run: dbt debug --profiles-dir "$HOME/.dbt"
 
       - name: Run Models
-        run: |
-          dbt run --profiles-dir "$HOME/.dbt"
+        run: dbt run --profiles-dir "$HOME/.dbt"
 
       - name: Run Tests
-        run: |
-          dbt test --profiles-dir "$HOME/.dbt"
+        run: dbt test --profiles-dir "$HOME/.dbt"
 
       - name: Check Source Freshness
         continue-on-error: true
-        run: |
-          dbt source freshness --profiles-dir "$HOME/.dbt"
+        run: dbt source freshness --profiles-dir "$HOME/.dbt"
 
       - name: Generate Docs
-        run: |
-          dbt docs generate --profiles-dir "$HOME/.dbt"
+        run: dbt docs generate --profiles-dir "$HOME/.dbt"
 
       - name: Upload dbt Artifacts
         if: always()
