@@ -90,7 +90,11 @@ jobs:
           echo ""
           echo "===== profiles.yml ====="
           cat ~/.dbt/profiles.yml
-     
+     - name: Show Generated Profile
+      run: |
+          echo "===== PROFILE FILE ====="
+          ls -la ~/.dbt
+          cat ~/.dbt/profiles.yml
 
       - name: Parse Project
         run: |
