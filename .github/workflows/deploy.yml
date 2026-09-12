@@ -82,6 +82,15 @@ jobs:
           echo ""
           echo "===== profiles.yml ====="
           cat ~/.dbt/profiles.yml
+     - name: Show dbt files
+       run: |
+          echo "===== dbt_project.yml ====="
+          cat dbt_project.yml
+
+          echo ""
+          echo "===== profiles.yml ====="
+          cat ~/.dbt/profiles.yml
+     
 
       - name: Parse Project
         run: |
