@@ -1,4 +1,4 @@
-name: Deploy Databricks DBT Project
+name: Deploy Databricks dbt Project
 
 on:
   push:
@@ -11,11 +11,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name }}
+    environment:
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'dev' || 'uat' }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Display Environment Mapping
+        run: |
+          echo "Branch: ${{ github.ref_name }}"
+          echo "Environment: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'develop' && 'dev' || 'uat' }}"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -26,11 +32,13 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install dbt-databricks
+          dbt --version
 
       - name: Setup Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Create Databricks Profile
+      - name: Create Databricks CLI Profile
+        shell: bash
         run: |
           cat > ~/.databrickscfg << EOF
           [DEFAULT]
@@ -38,29 +46,68 @@ jobs:
           token = ${{ secrets.DATABRICKS_TOKEN }}
           EOF
 
-      - name: Verify Databricks Authentication
-        run: databricks auth describe --profile DEFAULT
+          chmod 600 ~/.databrickscfg
+
+      - name: Create dbt Profile
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.dbt"
+
+          cat > "$HOME/.dbt/profiles.yml" << EOF
+          insurance_dbt_enterprise:
+            target: dev
+            outputs:
+              dev:
+                type: databricks
+                method: http
+                host: ${{ secrets.DATABRICKS_HOST }}
+                http_path: ${{ secrets.DATABRICKS_HTTP_PATH }}
+                token: ${{ secrets.DATABRICKS_TOKEN }}
+                catalog: hive_metastore
+                schema: default
+                threads: 4
+          EOF
+
+          chmod 600 "$HOME/.dbt/profiles.yml"
+
+          echo "Verifying dbt profile..."
+          ls -la "$HOME/.dbt"
+          cat "$HOME/.dbt/profiles.yml"
 
       - name: Install dbt Dependencies
-        run: dbt deps
+        run: |
+          dbt deps --profiles-dir "$HOME/.dbt"
 
       - name: Parse Project
-        run: dbt parse
+        run: |
+          dbt parse --profiles-dir "$HOME/.dbt"
 
       - name: Validate Connection
-        run: dbt debug
+        run: |
+          dbt debug --profiles-dir "$HOME/.dbt"
 
       - name: Run Models
-        run: dbt run
+        run: |
+          dbt run --profiles-dir "$HOME/.dbt"
 
       - name: Run Tests
-        run: dbt test
+        run: |
+          dbt test --profiles-dir "$HOME/.dbt"
+
+      - name: Check Source Freshness
+        continue-on-error: true
+        run: |
+          dbt source freshness --profiles-dir "$HOME/.dbt"
 
       - name: Generate Docs
-        run: dbt docs generate
+        run: |
+          dbt docs generate --profiles-dir "$HOME/.dbt"
 
-      - name: Upload Artifacts
+      - name: Upload dbt Artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dbt-artifacts
+          name: dbt-artifacts-${{ github.ref_name }}-${{ github.run_number }}
           path: target/
+          if-no-files-found: warn
+          retention-days: 30
