@@ -1,48 +1,103 @@
+# dbt properties file version
 version: 2
 
 sources:
+
+  # Logical name of the source system/schema
   - name: bronze
+
+    # Description of the Bronze source layer
     description: "Bronze/source tables used by the insurance dbt project."
+
+    # Physical database/schema where source tables exist
     schema: bronze
 
     tables:
+
+      # --------------------------------------------------
+      # CUSTOMER SOURCE TABLE
+      # --------------------------------------------------
       - name: customer
+
+        # Documentation for the customer table
         description: "Customer source data."
 
         config:
+
+          # Column used to check when source data was last updated
           loaded_at_field: updated_at
+
+          # Source freshness configuration
           freshness:
+
+            # Warning if data is older than 24 hours
             warn_after:
               count: 24
               period: hour
+
+            # Error if data is older than 48 hours
             error_after:
               count: 48
               period: hour
 
         columns:
+
+          # Customer business key
           - name: customer_id
             description: "Business key for customer."
+
             data_tests:
+
+              # Customer ID cannot be NULL
               - not_null
+
+              # Customer ID must be unique
               - unique
 
+          # Timestamp of the last customer update
           - name: updated_at
             description: "Last update timestamp."
 
+
+      # --------------------------------------------------
+      # POLICY SOURCE TABLE
+      # --------------------------------------------------
       - name: policy
+
+        # Documentation for the policy table
         description: "Policy source data."
 
         columns:
+
+          # Policy business key
           - name: policy_id
+
             data_tests:
+
+              # Policy ID cannot be NULL
               - not_null
+
+              # Policy ID must be unique
               - unique
 
+
+      # --------------------------------------------------
+      # PAYMENT SOURCE TABLE
+      # --------------------------------------------------
       - name: payment
+
+        # Documentation for the payment table
         description: "Payment source data."
 
         columns:
+
+          # Payment business key
           - name: payment_id
+
             data_tests:
+
+              # Payment ID cannot be NULL
               - not_null
+
+              # Payment ID must be unique
               - unique

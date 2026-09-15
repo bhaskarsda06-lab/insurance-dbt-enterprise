@@ -1,36 +1,94 @@
+# dbt properties file version
 version: 2
 
+# Define dbt models and their documentation/tests
 models:
+
+  # ==========================================================
+  # CUSTOMER DIMENSION
+  # ==========================================================
   - name: dim_customer
+
+    # Description of the model
     description: "Customer dimension."
+
     columns:
+
+      # Customer business key
       - name: customer_id
         description: "Business key."
+
         data_tests:
-          - not_null
-          - unique
-      - name: customer_name
-        data_tests:
+
+          # Customer ID cannot be NULL
           - not_null
 
-  - name: dim_policy
-    description: "Policy dimension."
-    columns:
-      - name: policy_id
-        data_tests:
-          - not_null
+          # Customer ID must be unique
           - unique
-      - name: customer_id
+
+      # Customer name column
+      - name: customer_name
+
         data_tests:
+
+          # Customer name cannot be NULL
+          - not_null
+
+
+  # ==========================================================
+  # POLICY DIMENSION
+  # ==========================================================
+  - name: dim_policy
+
+    # Description of the policy dimension
+    description: "Policy dimension."
+
+    columns:
+
+      # Policy business key
+      - name: policy_id
+
+        data_tests:
+
+          # Policy ID cannot be NULL
+          - not_null
+
+          # Policy ID must be unique
+          - unique
+
+      # Customer associated with the policy
+      - name: customer_id
+
+        data_tests:
+
+          # Check that every customer_id in dim_policy
+          # exists in dim_customer.
           - relationships:
+
+              # Target model/table for the relationship test
               to: ref('dim_customer')
+
+              # Column in the target model being referenced
               field: customer_id
 
-  
+
+  # ==========================================================
+  # CUSTOMER POLICY SUMMARY
+  # ==========================================================
   - name: customer_policy_summary
+
+    # Customer-level aggregate containing policy/payment information
     description: "Customer-level policy and payment aggregate."
+
     columns:
+
+      # Customer is the grain of this summary
       - name: customer_id
+
         data_tests:
+
+          # Customer ID must exist
           - not_null
+
+          # Only one summary row should exist per customer
           - unique

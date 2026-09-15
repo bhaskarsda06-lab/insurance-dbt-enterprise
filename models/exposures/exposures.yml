@@ -1,2 +1,15 @@
+# dbt properties file version
 version: 2
+
+# Exposures define how downstream users/applications
+# consume dbt models.
+#
+# Examples:
+# - Power BI dashboard
+# - Tableau report
+# - Business report
+# - Machine learning application
+# - Data science notebook
+#
+# Currently, no exposures are defined.
 exposures: []
