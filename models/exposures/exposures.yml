@@ -13,3 +13,27 @@ version: 2
 #
 # Currently, no exposures are defined.
 exposures: []
+
+
+#version: 2
+
+#exposures:
+
+  # Name of the downstream dashboard/application
+  #- name: insurance_customer_dashboard
+
+    # Human-readable description
+    #description: "Customer insurance dashboard."
+
+    # Type of downstream consumer
+    #type: dashboard
+
+    # Person/team responsible for this dashboard
+    #owner:
+      #name: Data Analytics Team
+
+    # dbt models used by the dashboard
+    #depends_on:
+      #- ref('dim_customer')
+      #- ref('dim_policy')
+      #- ref('customer_policy_summary')

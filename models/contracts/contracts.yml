@@ -1,24 +1,78 @@
+# dbt properties file version
 version: 2
 
+# Define dbt models
 models:
+
+  # ==========================================================
+  # FACT PAYMENT MODEL
+  # ==========================================================
   - name: fact_payment
+
+    # Description of the model
     description: "Payment fact table demonstrating incremental merge and model contracts."
+
     config:
+
+      # Enable dbt model contract enforcement.
+      # dbt will verify that the model follows
+      # the defined column structure and data types.
       contract:
         enforced: true
+
     columns:
+
+      # ========================================================
+      # PAYMENT ID
+      # ========================================================
       - name: payment_id
+
+        # Expected data type of payment_id
         data_type: string
+
+        # Description of the column
         description: "Unique payment identifier."
+
         data_tests:
+
+          # payment_id cannot be NULL
           - not_null
+
+          # payment_id must be unique
           - unique
+
+
+      # ========================================================
+      # PAYMENT AMOUNT
+      # ========================================================
       - name: payment_amount
+
+        # Expected data type
         data_type: double
+
+        # Description of the column
         description: "Payment amount."
+
+
+      # ========================================================
+      # PAYMENT DATE
+      # ========================================================
       - name: payment_date
+
+        # Expected data type
         data_type: date
+
+        # Description of the column
         description: "Payment date."
+
+
+      # ========================================================
+      # CUSTOMER ID
+      # ========================================================
       - name: customer_id
+
+        # Expected data type
         data_type: string
+
+        # Description of the column
         description: "Customer identifier."
